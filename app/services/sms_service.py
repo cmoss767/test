@@ -17,15 +17,18 @@ def _get_twilio_client() -> Client:
 
 
 async def send_sms_message(to: str, body: str) -> str:
-    client = _get_twilio_client()
-    loop = asyncio.get_running_loop()
-    def _send():
-        msg = client.messages.create(
-            messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
-            to=to,
-            body=body,
-        )
-        return msg.sid
-    sid = await loop.run_in_executor(None, _send)
-    return sid
+    try:
+        client = _get_twilio_client()
+        loop = asyncio.get_running_loop()
+        def _send():
+            msg = client.messages.create(
+                messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
+                to=to,
+                body=body,
+            )
+            return msg.sid
+        sid = await loop.run_in_executor(None, _send)
+        return sid
+    except Exception as e:
+        raise RuntimeError(f"SMS send failed: {str(e)}")
 

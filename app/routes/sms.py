@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from ..services.sms_service import send_sms_message
@@ -14,6 +14,9 @@ class SmsRequest(BaseModel):
 
 @router.post("/send")
 async def send_sms(req: SmsRequest):
-    message_sid = await send_sms_message(to=req.to, body=req.body)
-    return {"sid": message_sid}
+    try:
+        message_sid = await send_sms_message(to=req.to, body=req.body)
+        return {"sid": message_sid}
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
